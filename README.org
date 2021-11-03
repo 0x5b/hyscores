@@ -1,1 +1,2 @@
 * Hyscores
+  Simple service for saving high scores. Application agnostic (in theory).

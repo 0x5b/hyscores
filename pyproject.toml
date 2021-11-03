@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "hyscores"
+version = "0.1.0"
+description = ""
+authors = ["Anton Vazhnetsov <dragen15051@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+uWSGI = "^2.0.20"
+hy = "^1.0a3"
+Flask = "^2.0.2"
+PyJWT = "^2.3.0"
+pymongo = "^3.12.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

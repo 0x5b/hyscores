@@ -1,4 +1,5 @@
-(import [flask [Flask jsonify make_response request]])
+(import [flask [Flask jsonify make_response redirect request]])
+(import [pymongo.errors [DuplicateKeyError]])
 (import [werkzeug.security [generate_password_hash check_password_hash]])
 (import jwt)
 
@@ -12,13 +13,10 @@
       scores (collection "scores"))
 
 
-#@((app.route "/" :methods ["GET"])
-   (defn index []
-     (print (.get_json request))
-     (print (.get_data request))
-     (print (. request headers))
-     (print (. request authorization))
-     (return (jsonify "Success!"))))
+;; #@((app.route "/" :methods ["GET"])
+;;     (defn index []
+;;       ;; check redirect
+;;       (return (redirect "http://localhost:9000/login"))))
 
 
 #@((app.route "/register" :methods ["POST"])
@@ -30,26 +28,27 @@
             serv_response (, {"result" False} 500
                              {"Content-Type" "application/json"}))
 
+      (setv data (.get_json request))
+
       (if (or (not (. request authorization))
               (not (get (. request authorization) "username"))
-              (not (get (. request authorization) "password")))
+              (not (get (. request authorization) "password"))
+              (not (.get data "app")))
           (return er_response))
-      ;; how to get from dict?
-      ;; (if (not (get data "app"))
-      ;;     (return er_response))
  
       (setv [login password] (.values (. request authorization))
-            data (.get_json request)
             hashed (generate_password_hash password)
             user (users.find_one {"login" login "password" hashed}))
 
      (if (not user)
-          ;; TODO handle DuplicateKeyError
-          (setv result (users.insert_one {"login" login
-                                          "password" hashed
-                                          "app" (get data "app")})
-                added? (. result acknowledged))
-          (return ok_response))
+         (try
+             (setv result (users.insert_one {"login" login
+                                             "password" hashed
+                                             "app" (get data "app")})
+                   added? (. result acknowledged))
+             (except [e DuplicateKeyError]
+               (return (, (jsonify {"error" "User already exists"}) 200))))
+         (return ok_response))
       (if added?
           (return ok_response)
           (return serv_response))))
@@ -62,16 +61,15 @@
             er_response (, (jsonify {"result" "Invalid request"}) 400
                            {"Content-Type" "application/json"}))
 
+      (setv data (.get_json request))
+
       (if (or (not (. request authorization))
               (not (get (. request authorization) "username"))
-              (not (get (. request authorization) "password")))
+              (not (get (. request authorization) "password"))
+              (not (.get data "app")))
           (return er_response))
-      ;; how to get from dict?
-      ;; (if (not (get data "app"))
-      ;;     (return er_response))
 
       (setv [login password] (.values (. request authorization))
-            data (.get_json request)
             app  (get data "app")
             user (users.find_one {"login" login
                                   "app" app}))
@@ -90,12 +88,11 @@
      (setv er_response (, (jsonify {"result" "Invalid request"}) 400
                           {"Content-Type" "application/json"})
            data (.get_json request)
-           nickname (get data "nickname")
+           nickname (.get data "nickname")
            app (get user "app"))
      
-     ;; how to get from dict?
-     ;; (if (not (get data "nickname"))
-     ;;     (return er_response))
+     (if (not nickname)
+         (return er_response))
 
      (setv score (scores.find_one {"app" app "nickname" nickname}))
      (if score
@@ -110,13 +107,12 @@
      (setv er_response (, (jsonify {"result" "Invalid request"}) 400
                           {"Content-Type" "application/json"})
            data (.get_json request)
-           nickname (get data "nickname")
+           nickname (.get data "nickname")
            score (get data "score")
            app (get user "app"))
      
-     ;; how to get from dict?
-     ;; (if (not (get data "nickname"))
-     ;;     (return er_response))
+     (if (not nickname)
+         (return er_response))
 
      (setv old_score (scores.find_one {"app" app "nickname" nickname}))
      (if old_score

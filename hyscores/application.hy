@@ -1,10 +1,10 @@
-(import [flask [Flask jsonify make_response redirect request]])
-(import [pymongo.errors [DuplicateKeyError]])
-(import [werkzeug.security [generate_password_hash check_password_hash]])
+(import flask [Flask jsonify make_response redirect request])
+(import pymongo.errors [DuplicateKeyError])
+(import werkzeug.security [generate_password_hash check_password_hash])
 (import jwt)
 
-(import [hyscores.authorize [check_token]])
-(import [hyscores.mongodb [collection]])
+(import hyscores.authorize [check_token])
+(import hyscores.mongodb [collection])
 
 
 (setv app (Flask __name__)
@@ -35,7 +35,7 @@
               (not (get (. request authorization) "password"))
               (not (.get data "app")))
           (return er_response))
- 
+
       (setv [login password] (.values (. request authorization))
             hashed (generate_password_hash password)
             user (users.find_one {"login" login "password" hashed}))
@@ -90,7 +90,7 @@
            data (.get_json request)
            nickname (.get data "nickname")
            app (get user "app"))
-     
+
      (if (not nickname)
          (return er_response))
 
@@ -110,7 +110,7 @@
            nickname (.get data "nickname")
            score (get data "score")
            app (get user "app"))
-     
+
      (if (not nickname)
          (return er_response))
 

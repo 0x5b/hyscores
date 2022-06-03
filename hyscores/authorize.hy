@@ -1,10 +1,10 @@
-(import [functools [wraps]])
+(import functools [wraps])
 
 (import jwt)
-(import [jwt.exceptions [InvalidSignatureError]])
-(import [flask [jsonify request]])
+(import jwt.exceptions [InvalidSignatureError])
+(import flask [jsonify request])
 
-(import [hyscores.mongodb [collection]])
+(import hyscores.mongodb [collection])
 
 
 (setv secret "very secret"

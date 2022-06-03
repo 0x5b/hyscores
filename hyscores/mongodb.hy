@@ -1,5 +1,5 @@
 (import pymongo
-        [pymongo [MongoClient]])
+        pymongo [MongoClient])
 
 
 (setv CONFIG {"address" "127.0.0.1"
@@ -35,7 +35,7 @@
       (setv self._func func))
     (defn __call__ [self #*args #**kwargs]
       (return (self._func #*args #**kwargs))))
-      
+
   (defn __init__ [self collection]
     (setv self._collection collection))
 
